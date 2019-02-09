@@ -81,3 +81,50 @@ PRINT 'Adding Users to Roles.......';
 ALTER ROLE RoleService ADD MEMBER [Service];
 ALTER ROLE RoleReporting ADD MEMBER [Reporting];
 GO
+
+
+USE [master];
+GO
+
+
+-- =============================================  
+-- Author: Elvis R. Ramirez Iriarte
+-- Description: Creacion de base de datos (SGSSOCODE)
+-- =============================================  
+
+USE Master;
+IF NOT EXISTS(SELECT 1 FROM sys.databases WHERE name='SGSSOCODE')
+BEGIN
+	CREATE DATABASE SGSSOCODE;
+END
+ELSE
+BEGIN
+	ALTER DATABASE SGSSOCODE SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+	DROP DATABASE SGSSOCODE;
+	CREATE DATABASE SGSSOCODE;
+END
+GO
+
+USE SGSSOCODE;
+
+PRINT 'Creating Users....';
+
+IF NOT EXISTS ( SELECT 1 FROM sys.database_principals WHERE name = 'Service')
+	CREATE USER [Service] FOR LOGIN [Service] WITH DEFAULT_SCHEMA = [dbo];
+
+IF NOT EXISTS ( SELECT 1 FROM sys.database_principals WHERE name = 'Reporting')
+	CREATE USER [Reporting] FOR LOGIN [Reporting] WITH DEFAULT_SCHEMA = [dbo];
+
+PRINT 'Creating Roles.......';
+
+IF NOT EXISTS ( SELECT 1 FROM sys.database_principals WHERE name = 'RoleService' and Type = 'R')
+	CREATE ROLE RoleService AUTHORIZATION [dbo];
+
+IF NOT EXISTS ( SELECT 1 FROM sys.database_principals WHERE name = 'RoleReporting' and Type = 'R')
+	CREATE ROLE RoleReporting AUTHORIZATION [dbo];
+
+PRINT 'Adding Users to Roles.......';
+ALTER ROLE RoleService ADD MEMBER [Service];
+ALTER ROLE RoleReporting ADD MEMBER [Reporting];
+
+PRINT 'Creating Synonyms....';
