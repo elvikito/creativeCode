@@ -30,6 +30,7 @@ ALTER TABLE [dbo].[Person] ADD [Rowversion] [timestamp] NOT NULL;
 ALTER TABLE [dbo].[Position] ADD [Rowversion] [timestamp] NOT NULL;
 ALTER TABLE [dbo].[Person_Role] ADD [Rowversion] [timestamp] NOT NULL;
 ALTER TABLE [dbo].[Role] ADD [Rowversion] [timestamp] NOT NULL;
+ALTER TABLE [dbo].[Project] ADD [Rowversion] [timestamp] NOT NULL;
 GO
 
 /*************************************************************************
@@ -48,7 +49,7 @@ CREATE SCHEMA [ETL];
 GO
 
 /*************************************************************************
-**  Schema Name: [ETL]													**
+**  Table Name: [ETL]													**
 **																		**
 **  Primary Key: [IDMigration]											**
 **	Foreign Keys: -   													**
@@ -167,7 +168,7 @@ GO
 /*************************************************************************
 **  Procedure Name:	[ETL].[PullDataToDatawarehouse]						**
 **	Description: Pulls Changes and Inserts								**
-**				 from the School to DWSchool Database					**
+**				 from the SGSSO to DWSchool Database					**
 **																		**
 **	Called by: SQL Job													**
 **	Author: Marcelo Claure												**
@@ -208,3 +209,111 @@ BEGIN
 END
 GO
 
+/*************************************************************************
+**  Procedure Name:	[ETL].[GetMachinaryChangesByRowVersion]				**
+**																		**
+**	Called by: SQL Job													**
+**	Author: Elvis Leonel Arispe	Cabrera									**
+**																		**
+**************************************************************************
+**                            CHANGE HISTORY							**
+**************************************************************************
+** Date:			Author:					Description:				**
+** -----------		----------------		----------------			**
+** 10/02/2019		Elvis L. Arispe			Version Initial				**
+**************************************************************************/
+
+CREATE PROCEDURE [ETL].[GetMachinaryChangesByRowVersion]
+(
+  @LastRowVersionID BIGINT,
+  @CurrentDBTS      BIGINT
+)
+AS
+	SET NOCOUNT ON;
+	SET XACT_ABORT ON;
+
+	SELECT	 mc.machinery_id
+			,mc.name_machinery
+			,mc.brand_machinery
+			,mc.model_machinery
+	FROM [dbo].[Machinery] mc
+	WHERE [Rowversion] > CONVERT(ROWVERSION, @LastRowVersionID)
+	AND [Rowversion] <= CONVERT(ROWVERSION, @CurrentDBTS);
+GO
+
+/*************************************************************************
+**  Procedure Name:	[ETL].[GetProjectChangesByRowVersion]				**
+**																		**
+**	Called by: SQL Job													**
+**	Author: Elvis Leonel Arispe	Cabrera									**
+**																		**
+**************************************************************************
+**                            CHANGE HISTORY							**
+**************************************************************************
+** Date:			Author:					Description:				**
+** -----------		----------------		----------------			**
+** 10/02/2019		Elvis L. Arispe			Version Initial				**
+**************************************************************************/
+
+CREATE PROCEDURE [ETL].[GetProyectChangesByRowVersion]
+(
+  @LastRowVersionID BIGINT,
+  @CurrentDBTS      BIGINT
+)
+AS
+	SET NOCOUNT ON;
+	SET XACT_ABORT ON;
+
+	SELECT	proj.project_id
+			,proj.name_project
+			,proj.location_project
+			,proj.budget_project
+	FROM [dbo].[Project] proj
+	WHERE [Rowversion] > CONVERT(ROWVERSION, @LastRowVersionID)
+	AND [Rowversion] <= CONVERT(ROWVERSION, @CurrentDBTS);
+GO
+
+/*************************************************************************
+**  Procedure Name:	[ETL].[GetAccidentChangesByRowVersion]				**
+**																		**
+**	Called by: SQL Job													**
+**	Author: Elvis Leonel Arispe	Cabrera									**
+**																		**
+**************************************************************************
+**                            CHANGE HISTORY							**
+**************************************************************************
+** Date:			Author:					Description:				**
+** -----------		----------------		----------------			**
+** 10/02/2019		Elvis L. Arispe			Version Initial				**
+**************************************************************************/
+
+CREATE PROCEDURE [ETL].[GetAccidentChangesByRowVersion]	
+(
+  @LastRowVersionID BIGINT,
+  @CurrentDBTS      BIGINT
+)
+AS
+	SET NOCOUNT ON;
+	SET XACT_ABORT ON;
+
+	SELECT	emp.employee_id				-- id Empleado
+			,emp_proj.project_id		-- id Proyecto
+			,ass_mac.machinery_id		-- id Maquinaria
+			,ass_item.item_equipment_id	-- id Item
+			,acc.cause
+			,acc.severity
+			,acc.turn
+	FROM [dbo].[Accident] acc
+	INNER JOIN [dbo].[Accident_type] ty
+	ON (ty.accident_type_id=acc.accident_type_id)
+	INNER JOIN [dbo].[Employee] emp
+	ON (emp.employee_id = acc.employee_id)
+	INNER JOIN [dbo].[Employee_Project] emp_proj
+	ON (emp_proj.employee_id = emp.employee_id)
+	INNER JOIN [dbo].[Assignment_Machinery] ass_mac
+	ON (ass_mac.emp_proj_id = emp_proj.emp_proj_id)
+	INNER JOIN [dbo].[Assignment_Item_Equipment] ass_item
+	ON (ass_item.emp_proj_id = emp_proj.emp_proj_id)
+	WHERE acc.[Rowversion] > CONVERT(ROWVERSION, @LastRowVersionID)
+	AND acc.[Rowversion] <= CONVERT(ROWVERSION, @CurrentDBTS);	
+GO
