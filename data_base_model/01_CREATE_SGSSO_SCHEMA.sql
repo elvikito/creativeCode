@@ -250,7 +250,7 @@ GO
 /*************************************************************************
 **  Table Name: [dbo].[Area_Position]		  							**
 **																		**
-**  Primary Key: -														**
+**  Primary Key: area_position_id										**
 **	Foreign Keys: area_id, position_id					  				**
 **************************************************************************
 **                            CHANGE HISTORY							**
@@ -259,6 +259,7 @@ GO
 ** -----------		----------------		----------------			**
 ** 26/01/2019		Elvis R. Ramirez 		Version Initial				**
 ** 08/01/2019		Antonio Vargas			Add constraint primary key	**
+** 09/01/2019		Antonio Vargas			Add PK area_position_id    	**
 **************************************************************************/
 PRINT 'Creating the Area_Position table...';
 
@@ -267,16 +268,12 @@ IF NOT EXISTS (	SELECT 1
 			WHERE OBJECT_ID = OBJECT_ID(N'[dbo].[Area_Position]') 
 					AND TYPE IN (N'U'))
 	BEGIN
-		CREATE TABLE [dbo].[Area_Position]( 
-			area_id     INT CONSTRAINT	FK_area FOREIGN KEY REFERENCES [dbo].[Area](area_id) ON DELETE CASCADE,
-			position_id INT CONSTRAINT	FK_position FOREIGN KEY REFERENCES [dbo].[Position](position_id) ON DELETE CASCADE,
-			created_at	VARCHAR DEFAULT NULL,
-			updated_at	VARCHAR DEFAULT NULL,
-			CONSTRAINT PK_area_position PRIMARY KEY(
-				area_id      ASC,
-				position_id  ASC
-			)
-		);
+		CREATE TABLE [dbo].[Area_Position](
+			area_position_id INT IDENTITY CONSTRAINT PK_area_position PRIMARY KEY NOT NULL,
+			area_id          INT CONSTRAINT	FK_area FOREIGN KEY REFERENCES [dbo].[Area](area_id) ON DELETE CASCADE,
+			position_id      INT CONSTRAINT	FK_position FOREIGN KEY REFERENCES [dbo].[Position](position_id) ON DELETE CASCADE,
+			created_at	     VARCHAR DEFAULT NULL,
+			updated_at	     VARCHAR DEFAULT NULL);
 
 		PRINT 'Table Area_Position created!';
 	END
@@ -329,13 +326,14 @@ GO
 **  Table Name: [dbo].[Contract]			  							**
 **																		**
 **  Primary Key: contract_id											**
-**	Foreign Keys: employee_id,position_id								**
+**	Foreign Keys: employee_id, area_position_id 						**
 **************************************************************************
 **                            CHANGE HISTORY							**
 **************************************************************************
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
 ** 26/01/2019		Elvis R. Ramirez		Version Initial				**
+** 09/01/2019		Antonio Vargas			Add FK area_position_id    	**
 **************************************************************************/
 PRINT 'Creating the Contract table...';
 
@@ -345,15 +343,15 @@ IF NOT EXISTS (	SELECT 1
 						AND TYPE IN (N'U'))
 	BEGIN
 		CREATE TABLE [dbo].[Contract](
-			contract_id	  INT IDENTITY CONSTRAINT PK_contract PRIMARY KEY NOT NULL,
-			employee_id	  INT CONSTRAINT FK_contract_employee FOREIGN KEY REFERENCES [dbo].[Employee](employee_id) ON DELETE CASCADE,
-			position_id	  INT CONSTRAINT FK_contract_position FOREIGN KEY REFERENCES [dbo].[Position](position_id) ON DELETE CASCADE,
-			salary		  MONEY CONSTRAINT NN_salary NOT NULL,
-			init_date	  DATETIME CONSTRAINT NN_init_date NOT NULL,
-			end_date	  DATETIME DEFAULT NULL,
-			employee_type VARCHAR(8) CONSTRAINT NN_employee_type NOT NULL CHECK (employee_type IN('Parcial', 'Complete')),
-			created_at	  DATETIME DEFAULT NULL,
-			updated_at	  DATETIME DEFAULT NULL);
+			contract_id	     INT IDENTITY CONSTRAINT PK_contract PRIMARY KEY NOT NULL,
+			employee_id	     INT CONSTRAINT FK_contract_employee FOREIGN KEY REFERENCES [dbo].[Employee](employee_id) ON DELETE CASCADE,
+			area_position_id INT CONSTRAINT FK_contract_area_position FOREIGN KEY REFERENCES [dbo].[Area_Position](area_position_id) ON DELETE CASCADE,
+			salary		     MONEY CONSTRAINT NN_salary NOT NULL,
+			init_date	     DATETIME CONSTRAINT NN_init_date NOT NULL,
+			end_date	     DATETIME DEFAULT NULL,
+			employee_type    VARCHAR(8) CONSTRAINT NN_employee_type NOT NULL CHECK (employee_type IN('Parcial', 'Complete')),
+			created_at	     DATETIME DEFAULT NULL,
+			updated_at	     DATETIME DEFAULT NULL);
 
 		PRINT 'Table Contract created!';
 	END
