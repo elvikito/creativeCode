@@ -25,3 +25,6 @@ INSERT INTO [ETL].[TableMigration]([TableName],[LatestChange])
 			,('Item',0)
 			,('Accident',0)
 GO
+
+PRINT 'Table Migration initialization done...';
+COMMIT TRANSACTION;

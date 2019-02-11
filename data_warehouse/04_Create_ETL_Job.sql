@@ -1,7 +1,6 @@
 USE [msdb];
 GO
 
-
 /*************************************************************************
 **  Activity Name: Job			 										**
 **																		**
@@ -11,7 +10,9 @@ GO
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
+** 10/02/2019		Pamela Cardozo			Version Initial				**
 **************************************************************************/
+
 BEGIN TRANSACTION
 DECLARE @ReturnCode INT
 SELECT @ReturnCode = 0;
@@ -46,7 +47,7 @@ EXEC @ReturnCode = msdb.dbo.sp_add_jobstep @job_id=@jobId, @step_name=N'Pull SGS
 		@retry_attempts=0, 
 		@retry_interval=0, 
 		@os_run_priority=0, @subsystem=N'TSQL', 
-		@command=	  N'EXECUTE [ETL].[PullDataToDatawarehouse] @table = ''Machinery'';
+		@command=	  N'EXECUTE [ETL].[PullDataToDatawarehouse] @table = ''Machinary'';
 						EXECUTE [ETL].[PullDataToDatawarehouse] @table = ''Project'';
 						EXECUTE [ETL].[PullDataToDatawarehouse] @table = ''Employee'';
 						EXECUTE [ETL].[PullDataToDatawarehouse] @table = ''Item'';
@@ -67,8 +68,8 @@ EXEC @ReturnCode = msdb.dbo.sp_add_jobstep @job_id=@jobId, @step_name=N'Merge SG
 		@os_run_priority=0, @subsystem=N'TSQL', 
 		@command= N'EXECUTE [ETL].[DW_MergeMachinary];
 					EXECUTE [ETL].[DW_MergeProject];
-					EXECUTE [ETL].[DW_MergeInstructor];
-					EXECUTE [ETL].[DW_MergeStudent];
+					EXECUTE [ETL].[DW_MergeEmployee];
+					EXECUTE [ETL].[DW_MergeItem];
 					EXECUTE [ETL].[DW_MergeAccident];', 
 		@database_name=N'DWSGSSO', 
 		@flags=0
@@ -86,8 +87,8 @@ EXEC @ReturnCode = msdb.dbo.sp_add_jobstep @job_id=@jobId, @step_name=N'Clean St
 		@os_run_priority=0, @subsystem=N'TSQL', 
 		@command= N'TRUNCATE TABLE [ETL].[Machinary];
 					TRUNCATE TABLE [ETL].[Project];
-					TRUNCATE TABLE [ETL].[Instructor];
-					TRUNCATE TABLE [ETL].[Student];
+					TRUNCATE TABLE [ETL].[Employee];
+					TRUNCATE TABLE [ETL].[Item];
 					TRUNCATE TABLE [ETL].[Accident];', 
 		@database_name=N'DWSGSSO', 
 		@flags=0
@@ -116,5 +117,4 @@ QuitWithRollback:
     IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION
 EndSave:
 GO
-
 

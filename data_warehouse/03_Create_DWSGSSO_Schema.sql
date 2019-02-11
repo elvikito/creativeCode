@@ -67,7 +67,61 @@ CREATE TABLE [dbo].[DimProject]
 GO
 
 /*************************************************************************
-**  Table Name: [dbo].[DimProject]										**
+**  Table Name: [dbo].[DimEmployee]										**
+**																		**
+**  Primary Key: [employee_id]											**
+**	Foreign Keys: --													**
+**************************************************************************
+**                            CHANGE HISTORY							**
+**************************************************************************
+** Date:			Author:					Description:				**
+** -----------		----------------		----------------			**
+** 10/02/2019		Pamela Cardozo			Version Initial				**
+**************************************************************************/
+
+CREATE TABLE [dbo].[DimEmployee](
+	[employee_id] [int] NOT NULL,
+	[Employeefirst_name] [nvarchar](50) NOT NULL,
+	[Employeelast_name] [nvarchar](50) NOT NULL,
+	[Employeeci] [int] NOT NULL,
+	[Employeegender] [nvarchar](50) NOT NULL,
+	[Employeephone_number] [int] NOT NULL,
+ CONSTRAINT [PK_DimEmployee] PRIMARY KEY CLUSTERED 
+(
+	[employee_id] ASC
+	
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+/*************************************************************************
+**  Table Name: [dbo].[DimItem]											**
+**																		**
+**  Primary Key: [item_equipment_id]									**
+**	Foreign Keys: --													**
+**************************************************************************
+**                            CHANGE HISTORY							**
+**************************************************************************
+** Date:			Author:					Description:				**
+** -----------		----------------		----------------			**
+** 10/02/2019		Pamela Cardozo			Version Initial				**
+**************************************************************************/
+
+CREATE TABLE [dbo].[DimItem](
+    [item_equipment_id] [int] NOT NULL,
+	[Itemname_equipment] [nvarchar](100) NOT NULL,
+	[Itemdescription] [nvarchar](100) NOT NULL,
+	
+ CONSTRAINT [PK_DimItem] PRIMARY KEY CLUSTERED 
+(
+	[item_equipment_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+
+/*************************************************************************
+**  Table Name: [dbo].[FactAccident]									**
 **																		**
 **  Primary Key: [project_id]											**
 **	Foreign Keys: employee_id,project_id,machinery_id,item_equipment_id **
@@ -143,7 +197,47 @@ CREATE TABLE [ETL].[Project]
 GO
 
 /*************************************************************************
-**  Table Name: [dbo].[DimProject]										**
+**  Table Name: [ETL].[Employee]										**
+**																		**
+**************************************************************************
+**                            CHANGE HISTORY							**
+**************************************************************************
+** Date:			Author:					Description:				**
+** -----------		----------------		----------------			**
+** 10/02/2019		Pamela Cardozo			Version Initial				**
+**************************************************************************/
+
+CREATE TABLE [ETL].[Employee](
+	[employee_id] [int] NOT NULL,
+	[first_name] [nvarchar](50) NOT NULL,
+	[last_name] [nvarchar](50) NOT NULL,
+	[ci] [int] NOT NULL,
+	[gender] [nvarchar](50) NOT NULL,
+	[phone_number] [int] NOT NULL,
+) ON [PRIMARY]
+GO
+
+/*************************************************************************
+**  Table Name: [ETL].[Item]											**
+**																		**
+**************************************************************************
+**                            CHANGE HISTORY							**
+**************************************************************************
+** Date:			Author:					Description:				**
+** -----------		----------------		----------------			**
+** 10/02/2019		Pamela Cardozo			Version Initial				**
+**************************************************************************/
+
+CREATE TABLE [ETL].[Item](
+	[item_equipment_id] [int] NOT NULL,
+	[name_equipment] [nvarchar](100) NOT NULL,
+	[description] [nvarchar](100) NOT NULL,
+	
+) ON [PRIMARY]
+GO
+
+/*************************************************************************
+**  Table Name: [ETL].[Accident]										**
 **																		**
 **************************************************************************
 **                            CHANGE HISTORY							**
@@ -165,9 +259,8 @@ CREATE TABLE [ETL].[Accident]
 ) ON [PRIMARY]
 GO
 
-
 /*************************************************************************
-**  Activity Name: Add Foreign Key´s									**
+**  Activity Name: Add Foreign Keyæ„€									**
 **																		**
 **************************************************************************
 **                            CHANGE HISTORY							**
@@ -175,16 +268,27 @@ GO
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
+** 10/02/2019		Pamela Cardozo			Version Initial				**
 **************************************************************************/
 ALTER TABLE [dbo].[FactAccident]  WITH CHECK ADD  CONSTRAINT [FK_DimMachinary] FOREIGN KEY(machinary_id)
-REFERENCES [dbo].[DimMachinary] (machinary_id)
+REFERENCES  [dbo].[DimMachinary] (machinary_id)
 GO
 ALTER TABLE [dbo].[FactAccident] CHECK CONSTRAINT [FK_DimMachinary]
 GO
 ALTER TABLE [dbo].[FactAccident]  WITH CHECK ADD  CONSTRAINT [FK_DimProject] FOREIGN KEY(project_id)
-REFERENCES [dbo].[DimProject] (project_id)
+REFERENCES  [dbo].[DimProject] (project_id)
 GO
 ALTER TABLE [dbo].[FactAccident] CHECK CONSTRAINT [FK_DimProject]
+GO
+ALTER TABLE [dbo].[FactAccident]  WITH CHECK ADD  CONSTRAINT [FK_DimEmployee] FOREIGN KEY([employee_id])
+REFERENCES  [dbo].[DimEmployee] ([employee_id])
+GO
+ALTER TABLE [dbo].[FactAccident] CHECK CONSTRAINT [FK_DimEmployee]
+GO
+ALTER TABLE [dbo].[FactAccident]  WITH CHECK ADD  CONSTRAINT [FK_DimItem] FOREIGN KEY([item_equipment_id])
+REFERENCES  [dbo].[DimItem] ([item_equipment_id])
+GO
+ALTER TABLE [dbo].[FactAccident] CHECK CONSTRAINT [FK_DimItem]
 GO
 
 /*************************************************************************
@@ -287,11 +391,105 @@ BEGIN
 END
 GO
 
+/*************************************************************************
+** Procedure Name: [ETL].[DW_MergeEmployee]								**
+** Called By SQL Job ETL												**
+**************************************************************************
+**                            CHANGE HISTORY							**
+**************************************************************************
+** Date:			Author:					Description:				**
+** -----------		----------------		----------------			**
+** 10/02/2019		Pamela Cardozo			Version Initial				**
+**************************************************************************/
+
+CREATE PROCEDURE [ETL].[DW_MergeEmployee]
+AS
+SET NOCOUNT ON;
+SET XACT_ABORT ON;
+BEGIN
+	MERGE [dbo].[DimEmployee] AS target
+	USING [ETL].[Employee] AS source
+	ON
+	(
+	  target.[employee_id] = source.[employee_id]
+	)
+	WHEN MATCHED
+	THEN UPDATE 
+		 SET [Employeefirst_name]   = source.[first_name]
+			,[Employeelast_name] = source.[last_name]
+			,[Employeeci] = source.[ci]
+			,[Employeegender] = source.[gender]
+			,[Employeephone_number] = source.[phone_number]
+	WHEN NOT MATCHED
+	THEN 
+	  INSERT
+	  (
+		 [employee_id]
+		,[Employeefirst_name]
+		,[Employeelast_name]
+		,[Employeeci]
+		,[Employeegender]
+		,[Employeephone_number]
+	  )
+	  VALUES
+	  (
+		source.[employee_id]
+		,source.[first_name]
+		,source.[last_name]
+		,source.[ci]
+		,source.[gender]
+		,source.[phone_number]
+	  );
+END
+GO
+
+
+/******************************************************************************
+**  Name: [ETL].[DW_MergeItem]
+**  Desc: Merges Source ETL.Item changes into Destination dbo.DimItem table. 
+**  Called By SQL Job ETL
+** **
+*******************************************************************************
+**                            Change History
+*******************************************************************************
+**  Date:       Author:          Description:
+**  --------    --------------   ---------------------------------------------------
+** 10/02/2018   Pamela Cardozo   Initial Version
+******************************************************************************/
+CREATE PROCEDURE [ETL].[DW_MergeItem]
+AS
+SET NOCOUNT ON;
+SET XACT_ABORT ON;
+BEGIN
+	MERGE [dbo].[DimItem] AS target
+	USING [ETL].[Item] AS source
+	ON
+	(
+	  target.[item_equipment_id] = source.[item_equipment_id]
+	)
+	WHEN MATCHED
+	THEN UPDATE 
+		 SET [Itemname_equipment] = source.[name_equipment]
+			,[Itemdescription]     = source.[description]
+	WHEN NOT MATCHED
+	THEN 
+	  INSERT
+	  (
+		[item_equipment_id] 
+		,[Itemname_equipment]
+		,[Itemdescription] 
+	  )
+	  VALUES
+	  (
+		source.[item_equipment_id]
+		,source.[name_equipment]
+		,source.[description]
+	  );
+END
+GO
 
 /*************************************************************************
 ** Procedure Name: [ETL].[DW_MergeAccident]								**
-** Description: Merges Source ETL.Machinary changes into				**
-**				Destination dbo.DimMachinary table.						**
 ** Called By SQL Job ETL												**
 **																		**
 **																		**
