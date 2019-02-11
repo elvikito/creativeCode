@@ -210,7 +210,7 @@ END
 GO
 
 /*************************************************************************
-**  Procedure Name:	[ETL].[GetMachinaryChangesByRowVersion]				**
+**  Procedure Name:	[ETL].[GetMachineryChangesByRowVersion]				**
 **																		**
 **	Called by: SQL Job													**
 **	Author: Elvis Leonel Arispe	Cabrera									**
@@ -223,7 +223,7 @@ GO
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
 
-CREATE PROCEDURE [ETL].[GetMachinaryChangesByRowVersion]
+CREATE PROCEDURE [ETL].[GetMachineryChangesByRowVersion]
 (
   @LastRowVersionID BIGINT,
   @CurrentDBTS      BIGINT
@@ -255,7 +255,7 @@ GO
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
 
-CREATE PROCEDURE [ETL].[GetProyectChangesByRowVersion]
+CREATE PROCEDURE [ETL].[GetProjectChangesByRowVersion]
 (
   @LastRowVersionID BIGINT,
   @CurrentDBTS      BIGINT
@@ -271,6 +271,71 @@ AS
 	FROM [dbo].[Project] proj
 	WHERE [Rowversion] > CONVERT(ROWVERSION, @LastRowVersionID)
 	AND [Rowversion] <= CONVERT(ROWVERSION, @CurrentDBTS);
+GO
+
+/*************************************************************************
+**  Procedure Name:	[ETL].[GetEmployeeChangesByRowVersion]				**
+**																		**
+**	Called by: SQL Job													**
+**																		**
+**************************************************************************
+**                            CHANGE HISTORY							**
+**************************************************************************
+** Date:			Author:					Description:				**
+** -----------		----------------		----------------			**
+** 10/02/2019		Pamela Cardozo			Version Initial				**
+**************************************************************************/
+
+CREATE PROCEDURE [ETL].[GetEmployeeChangesByRowVersion]
+(
+  @LastRowVersionID BIGINT,
+  @CurrentDBTS      BIGINT
+)
+AS
+	SET NOCOUNT ON;
+	SET XACT_ABORT ON;
+
+	SELECT emp.[employee_id]
+		  ,per.[first_name]
+		  ,per.[last_name]
+		  ,emp.[ci]
+		  ,emp.[gender]
+		  ,emp.[phone_number]
+	FROM [dbo].[Employee] emp
+	INNER JOIN [dbo].[Person] per
+	ON (emp.person_id = per.person_id)
+	WHERE emp.[Rowversion] > CONVERT(ROWVERSION, @LastRowVersionID)
+	AND emp.[Rowversion] <= CONVERT(ROWVERSION, @CurrentDBTS)
+GO
+
+/*************************************************************************
+**  Procedure Name:	[ETL].[GetEmployeeChangesByRowVersion]				**
+**																		**
+**	Called by: SQL Job													**
+**																		**
+**************************************************************************
+**                            CHANGE HISTORY							**
+**************************************************************************
+** Date:			Author:					Description:				**
+** -----------		----------------		----------------			**
+** 10/02/2019		Pamela Cardozo			Version Initial				**
+**************************************************************************/
+
+CREATE PROCEDURE [ETL].[GetItemChangesByRowVersion]
+(
+  @LastRowVersionID BIGINT,
+  @CurrentDBTS      BIGINT
+)
+AS
+	SET NOCOUNT ON;
+	SET XACT_ABORT ON;
+
+	SELECT [item_equipment_id]
+		  ,[name_equipment] 
+		  ,[description] 
+	FROM [dbo].[Item] 
+	WHERE [Rowversion] > CONVERT(ROWVERSION, @LastRowVersionID)
+	AND [Rowversion] <= CONVERT(ROWVERSION, @CurrentDBTS)
 GO
 
 /*************************************************************************
