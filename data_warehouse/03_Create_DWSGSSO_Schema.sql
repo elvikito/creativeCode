@@ -260,7 +260,7 @@ CREATE TABLE [ETL].[Accident]
 GO
 
 /*************************************************************************
-**  Activity Name: Add Foreign Key´s									**
+**  Activity Name: Add Foreign Keyæ„€									**
 **																		**
 **************************************************************************
 **                            CHANGE HISTORY							**
