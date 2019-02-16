@@ -10,10 +10,10 @@ DECLARE @passwd VARCHAR(256)
 SET @passwd = 'CreativeCode_1'
 
 IF NOT EXISTS ( SELECT * FROM sys.server_principals WHERE name = 'Service' )
-  CREATE LOGIN [Service] WITH PASSWORD = '$(passwd)', CHECK_POLICY = OFF;
-
+  CREATE LOGIN [Service] WITH PASSWORD = N'Service', CHECK_POLICY = ON, CHECK_EXPIRATION = OFF;
+  
 IF NOT EXISTS ( SELECT * FROM sys.server_principals WHERE name = 'Reporting' )
-  CREATE LOGIN [Reporting] WITH PASSWORD = '$(passwd)', CHECK_POLICY = OFF;
+  CREATE LOGIN [Reporting] WITH PASSWORD = N'Reporting', CHECK_POLICY = ON, CHECK_EXPIRATION = OFF;
 
 
 -- =============================================  
