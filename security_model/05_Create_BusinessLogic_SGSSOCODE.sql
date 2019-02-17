@@ -401,8 +401,7 @@ SET XACT_ABORT ON;
 SET NOCOUNT ON;
 BEGIN
     UPDATE [dbo].[Person]
-    SET   [person_id]    = @person_id
-         ,[first_name]   = @first_name
+    SET   [first_name]   = @first_name
          ,[last_name]    = @last_name
          ,[email]        = @email
          ,[created_at]   = @created_at
@@ -563,8 +562,7 @@ SET XACT_ABORT ON;
 SET NOCOUNT ON;
 BEGIN
     UPDATE [dbo].[Project]
-    SET  [project_id]           = @project_id
-         ,[name_project]        = @name_project
+    SET  [name_project]        = @name_project
          ,[design_project]      = @design_project
          ,[location_project]    = @location_project
          ,[budget_project]      = @budget_project
@@ -660,4 +658,116 @@ GRANT EXECUTE ON OBJECT::[dbo].[UpdateRole] TO [RoleService] AS [dbo];
 GO
 
 PRINT 'Procedure [dbo].[UpdateRole] created';
+GO
+
+----------------
+-- POST 
+-- ----------------------------
+-- Author: Elvis R. Ramirez Iriarte 
+-- PROCEDURE InsertDepartment
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[InsertDepartment]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[InsertDepartment];
+END
+GO
+
+CREATE PROCEDURE [dbo].[InsertDepartment] (
+        @name           VARCHAR(255)
+        ,@description   VARCHAR(255)
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+    INSERT INTO [dbo].[Department] (
+         [name]
+        ,[description]
+	)
+	VALUES (
+		 @name
+        ,@description
+	);
+END
+GO
+GRANT EXECUTE ON OBJECT::[dbo].[InsertDepartment] TO [RoleService] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[InsertDepartment] created';
+GO
+
+----------------
+-- Update 
+-- ----------------------------
+-- Author: Elvis R. Ramirez Iriarte 
+-- PROCEDURE UpdateDepartment
+-- ----------------------------
+
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[UpdateDepartment]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[UpdateDepartment];
+END
+GO
+
+CREATE PROCEDURE [dbo].[UpdateDepartment] (
+	    @department_id   INT
+        ,@name           VARCHAR(255)
+        ,@description    VARCHAR(255)
+        ,@created_at     DATETIME
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+    UPDATE [dbo].[Department]
+    SET   [name]             = @name
+         ,[description]  = @description
+         ,[created_at]   = @created_at
+         ,[updated_at]   = GETDATE()
+	WHERE department_id   = @department_id
+END
+GO
+
+GRANT EXECUTE ON OBJECT::[dbo].[UpdateDepartment] TO [RoleService] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[UpdateDepartment] created';
+GO
+
+
+----------------
+-- Update 
+-- ----------------------------
+-- Author: Elvis R. Ramirez Iriarte 
+-- PROCEDURE DeleteDepartment
+-- ----------------------------
+
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[DeleteDepartment]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[DeleteDepartment];
+END
+GO
+CREATE PROCEDURE [dbo].[DeleteDepartment]
+(
+	@department_id INT
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+	DELETE FROM Department 
+	WHERE department_id = @department_id;
+END
+GO
+
+GRANT EXECUTE ON OBJECT::[dbo].[DeleteDepartment] TO [RoleService] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[DeleteDepartment] created';
 GO
