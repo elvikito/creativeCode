@@ -246,7 +246,7 @@ GO
 -- POST 
 -- ----------------------------
 -- Author: Elvis R. Ramirez Iriarte 
--- PROCEDURE PostEmployee
+-- PROCEDURE InsertEmployee
 -- ----------------------------
 
 IF EXISTS (SELECT * FROM sys.objects 
@@ -258,9 +258,7 @@ END
 GO
 
 CREATE PROCEDURE [dbo].[InsertEmployee] (
-	 @first_name   VARCHAR(50)
-	,@last_name    VARCHAR(50)
-	,@email        VARCHAR(40)
+     @person_id     INT
 	,@ci           INT
 	,@address      VARCHAR(255)
 	,@birth_date   DATETIME
@@ -290,13 +288,6 @@ BEGIN
 		,@phone_number
 		,@picture
 	);
-	
-	IF @@ROWCOUNT > 0
-	BEGIN
-		SELECT [updated_at] 
-		FROM Employee 
-		WHERE person_id = @person_id;
-	END
 END
 GO
 
@@ -315,37 +306,183 @@ END
 GO
 
 CREATE PROCEDURE [dbo].[UpdateEmployee] (
-	 @employee_id  INT
-	,@first_name   VARCHAR(50)
-	,@last_name    VARCHAR(50)
-	,@email        VARCHAR(40)
+	 @person_id  INT
 	,@ci           INT
 	,@address      VARCHAR(255)
 	,@birth_date   DATETIME
 	,@gender       VARCHAR(8)
 	,@phone_number INT
 	,@picture      VARBINARY(MAX)
+    ,@created_at   DATETIME
 )
 AS
 SET XACT_ABORT ON;
 SET NOCOUNT ON;
 BEGIN
-	UPDATE OfficeAssignment 
-	SET Location = @Location 
-	WHERE InstructorID = @InstructorID 
-	AND [Timestamp] = @OrigTimestamp;
-
-	IF @@ROWCOUNT > 0
-	 BEGIN
-		SELECT [Timestamp] 
-		FROM OfficeAssignment 
-		WHERE InstructorID = @InstructorID;
-	 END
+    UPDATE [dbo].[Employee]
+	SET   [ci]       = @ci
+	     ,[address]      = @address
+	     ,[birth_date]   = @birth_date
+	     ,[gender]       = @gender
+	     ,[phone_number] = @phone_number
+	     ,[picture]      = @picture
+         ,[created_at]   = @created_at
+         ,[updated_at]   = GETDATE()
+	WHERE person_id = @person_id;
 END
 GO
 
-GRANT EXECUTE ON OBJECT::[dbo].[UpdateEmployee] TO [MyService] AS [dbo];
+GRANT EXECUTE ON OBJECT::[dbo].[UpdateEmployee] TO [RoleReporting] AS [dbo];
 GO
 
 PRINT 'Procedure [dbo].[UpdateEmployee] created';
+GO
+
+
+-- POST 
+-- ----------------------------
+-- Author: Elvis R. Ramirez Iriarte 
+-- PROCEDURE InsertPerson
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[InsertPerson]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[InsertPerson];
+END
+GO
+
+CREATE PROCEDURE [dbo].[InsertPerson] (
+     @first_name    VARCHAR(50)
+    ,@last_name     VARCHAR(50)
+    ,@email         VARCHAR(40)
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+    INSERT INTO [dbo].[Person] (
+        [first_name]
+        ,[last_name]
+        ,[email]
+	)
+	VALUES (
+		 @first_name
+        ,@last_name
+		,@email
+	);
+END
+GO
+
+GRANT EXECUTE ON OBJECT::[dbo].[InsertPerson] TO [RoleReporting] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[InsertPerson] created';
+GO
+
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[UpdatePerson]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[UpdatePerson];
+END
+GO
+
+CREATE PROCEDURE [dbo].[UpdatePerson] (
+	 @person_id         INT
+	,@first_name        VARCHAR(50)
+    ,@last_name         VARCHAR(50)
+    ,@email             VARCHAR(40)
+    ,@created_at        DATETIME
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+    UPDATE [dbo].[Person]
+    SET   [first_name]   = @first_name
+         ,[last_name]    = @last_name
+         ,[email]        = @email
+         ,[created_at]   = @created_at
+         ,[updated_at]   = GETDATE()
+	WHERE person_id = @person_id;
+END
+GO
+
+GRANT EXECUTE ON OBJECT::[dbo].[UpdatePerson] TO [RoleReporting] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[UpdatePerson] created';
+GO
+
+
+-- POST 
+-- ----------------------------
+-- Author: Elvis R. Ramirez Iriarte 
+-- PROCEDURE InsertRolePerson
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[InsertRolePerson]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[InsertRolePerson];
+END
+GO
+
+CREATE PROCEDURE [dbo].[InsertRolePerson] (
+      @person_id    INT
+     ,@role_id     INT
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+    INSERT INTO [dbo].[Person_Role] (
+         [person_id]
+        ,[role_id]
+	)
+	VALUES (
+		 @person_id
+        ,@role_id
+	);
+END
+GO
+
+GRANT EXECUTE ON OBJECT::[dbo].[InsertRolePerson] TO [RoleReporting] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[InsertRolePerson] created';
+GO
+
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[UpdateRolePerson]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[UpdateRolePerson];
+END
+GO
+
+CREATE PROCEDURE [dbo].[UpdateRolePerson] (
+	 @person_id         INT
+	,@role_id           INT
+    ,@created_at        DATETIME
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+    UPDATE [dbo].[Person_Role]
+    SET   [person_id]    = @person_id
+         ,[role_id]      = @role_id
+         ,[created_at]   = @created_at
+         ,[updated_at]   = GETDATE()
+	WHERE person_id = @person_id AND
+          role_id   = @role_id
+END
+GO
+
+GRANT EXECUTE ON OBJECT::[dbo].[UpdateRolePerson] TO [RoleReporting] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[UpdateRolePerson] created';
 GO
