@@ -44,8 +44,15 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
-
-CREATE SCHEMA [ETL];
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'ETL')
+BEGIN
+	PRINT 'Creating the SCHEMA ETL ...';
+	EXEC('CREATE SCHEMA ETL')
+END
+ELSE
+BEGIN
+	PRINT ' SCHEMA ETL exist...';
+END
 GO
 
 /*************************************************************************
@@ -60,6 +67,12 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
+IF NOT EXISTS (SELECT 1 FROM sys.objects
+		       WHERE object_id = OBJECT_ID(N'[ETL].[TableMigration]')
+		       AND type in (N'U'))
+BEGIN
+	
+	PRINT 'Creating the TableMigration table ...';
 
 CREATE TABLE [ETL].[TableMigration](
 	[IDMigration] [int] IDENTITY(1,1) NOT NULL,
@@ -74,7 +87,11 @@ CREATE TABLE [ETL].[TableMigration](
 			ALLOW_ROW_LOCKS = ON, 
 			ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 			) ON [PRIMARY]
-
+END
+ ELSE
+	BEGIN
+		PRINT 'Table Table Migration already exists in the Database.. ';
+	END
 GO
 
 /*************************************************************************
@@ -92,7 +109,12 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
-
+PRINT 'Creating Function called  -> [ETL].[GetDatabaseRowVersion]...';
+IF OBJECT_ID (N'[ETL].[GetDatabaseRowVersion]') IS NOT NULL
+BEGIN
+    DROP FUNCTION [ETL].[GetDatabaseRowVersion];
+END
+GO
 CREATE FUNCTION [ETL].[GetDatabaseRowVersion] ()
 RETURNS BIGINT
 AS
@@ -117,7 +139,10 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
-
+PRINT 'Creating Function called -> [ETL].[GetTableMigrationLatestRowVersion]...';
+IF OBJECT_ID (N'[ETL].[GetTableMigrationLatestRowVersion]') IS NOT NULL  
+    DROP FUNCTION [ETL].[GetTableMigrationLatestRowVersion];  
+GO 
 CREATE FUNCTION [ETL].[GetTableMigrationLatestRowVersion] 
 (
 	@table VARCHAR(50)
@@ -150,7 +175,10 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
-
+PRINT 'Creating Procedure called -> [ETL].[UpdateTableMigration]...';
+IF OBJECT_ID (N'[ETL].[UpdateTableMigration]') IS NOT NULL   
+    DROP PROCEDURE [ETL].[UpdateTableMigration];  
+GO 
 CREATE PROCEDURE [ETL].[UpdateTableMigration]
 (
   @tableName VARCHAR(50),
@@ -181,7 +209,10 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
-
+PRINT 'Creating Procedure called -> [ETL].[PullDataToDatawarehouse]...';
+IF OBJECT_ID (N'[ETL].[PullDataToDatawarehouse]') IS NOT NULL  
+    DROP PROCEDURE [ETL].[PullDataToDatawarehouse];  
+GO 
 CREATE PROCEDURE [ETL].[PullDataToDatawarehouse]
 (
   @table VARCHAR(50)
@@ -196,7 +227,7 @@ BEGIN
 	DECLARE @lastDBTS       BIGINT = [ETL].[GetTableMigrationLatestRowVersion](@table); 
 
 	SET @ParmDefinition = N'@last BIGINT, @current BIGINT'; 
-	SET @SQLString = N'INSERT INTO [DWSchool].[ETL].[' + @table + ']
+	SET @SQLString = N'INSERT INTO [DWSGSSO].[ETL].[' + @table + ']
 					   EXECUTE [ETL].[Get' + @table + 'ChangesByRowVersion] @LastRowVersionID = @last
 																		   ,@CurrentDBTS      = @current;';  
 	EXECUTE SP_EXECUTESQL @SQLString
@@ -222,7 +253,10 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
-
+PRINT 'Creating Procedure called -> [ETL].[GetMachineryChangesByRowVersion]...';
+IF OBJECT_ID (N'[ETL].[GetMachineryChangesByRowVersion]') IS NOT NULL  
+    DROP PROCEDURE [ETL].[GetMachineryChangesByRowVersion];  
+GO 
 CREATE PROCEDURE [ETL].[GetMachineryChangesByRowVersion]
 (
   @LastRowVersionID BIGINT,
@@ -254,7 +288,10 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
-
+PRINT 'Creating Procedure called -> [ETL].[GetProjectChangesByRowVersion]...';
+IF OBJECT_ID (N'[ETL].[GetProjectChangesByRowVersion]') IS NOT NULL  
+    DROP PROCEDURE [ETL].[GetProjectChangesByRowVersion];  
+GO 
 CREATE PROCEDURE [ETL].[GetProjectChangesByRowVersion]
 (
   @LastRowVersionID BIGINT,
@@ -264,11 +301,11 @@ AS
 	SET NOCOUNT ON;
 	SET XACT_ABORT ON;
 
-	SELECT	proj.project_id
-			,proj.name_project
-			,proj.location_project
-			,proj.budget_project
-	FROM [dbo].[Project] proj
+	SELECT	project_id
+			,name_project
+			,location_project
+			,budget_project
+	FROM [dbo].[Project]
 	WHERE [Rowversion] > CONVERT(ROWVERSION, @LastRowVersionID)
 	AND [Rowversion] <= CONVERT(ROWVERSION, @CurrentDBTS);
 GO
@@ -351,7 +388,10 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
-
+PRINT 'Creating Procedure called -> [ETL].[GetAccidentChangesByRowVersion]...';
+IF OBJECT_ID (N'[ETL].[GetAccidentChangesByRowVersion]') IS NOT NULL  
+    DROP PROCEDURE [ETL].[GetAccidentChangesByRowVersion];  
+GO 
 CREATE PROCEDURE [ETL].[GetAccidentChangesByRowVersion]	
 (
   @LastRowVersionID BIGINT,
@@ -365,9 +405,11 @@ AS
 			,emp_proj.project_id		-- id Proyecto
 			,ass_mac.machinery_id		-- id Maquinaria
 			,ass_item.item_equipment_id	-- id Item
+			,acc.accident_id			-- id Accident
 			,acc.cause
 			,acc.severity
 			,acc.turn
+			,acc.day_lost
 	FROM [dbo].[Accident] acc
 	INNER JOIN [dbo].[Accident_type] ty
 	ON (ty.accident_type_id=acc.accident_type_id)

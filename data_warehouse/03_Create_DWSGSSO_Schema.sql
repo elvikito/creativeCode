@@ -17,8 +17,13 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
-CREATE TABLE [dbo].[DimMachinary]
-(
+IF NOT EXISTS (SELECT 1 FROM sys.objects
+		       WHERE object_id = OBJECT_ID(N'[dbo].[DimMachinary]')
+		       AND type in (N'U'))
+BEGIN
+	PRINT 'Creating the table DimMachinary ...';
+	CREATE TABLE [dbo].[DimMachinary]
+	(
 	machinary_id	INT NOT NULL
 	,name_mac		VARCHAR(150) NOT NULL
 	,brand_mac		VARCHAR(50) NOT NULL
@@ -32,7 +37,13 @@ CREATE TABLE [dbo].[DimMachinary]
 				ALLOW_ROW_LOCKS = ON, 
 				ALLOW_PAGE_LOCKS = ON
 			  ) ON [PRIMARY]
-) ON [PRIMARY]
+	) ON [PRIMARY]
+		PRINT 'DimMachinary Table Created!';
+	END
+ ELSE
+	BEGIN
+		PRINT 'DimMachinary table already exists in the Database: ';
+	END
 GO
 
 /*************************************************************************
@@ -47,9 +58,13 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
-
-CREATE TABLE [dbo].[DimProject]
-(
+IF NOT EXISTS (SELECT 1 FROM sys.objects
+		       WHERE object_id = OBJECT_ID(N'[dbo].[DimProject]')
+		       AND type in (N'U'))
+BEGIN
+	PRINT 'Creating the table DimProject ...';
+	CREATE TABLE [dbo].[DimProject]
+	(
 	project_id		INT NOT NULL
 	,name_pro		VARCHAR(255) NOT NULL
 	,location_pro	VARCHAR(255) NOT NULL
@@ -63,7 +78,13 @@ CREATE TABLE [dbo].[DimProject]
 				ALLOW_ROW_LOCKS = ON, 
 				ALLOW_PAGE_LOCKS = ON
 			  ) ON [PRIMARY]
-) ON [PRIMARY]
+	) ON [PRIMARY]
+		PRINT 'DimProject Table Created!';
+	END
+ ELSE
+	BEGIN
+		PRINT 'DimProject table already exists in the Database: ';
+	END
 GO
 
 /*************************************************************************
@@ -132,16 +153,22 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
-
-CREATE TABLE [dbo].[FactAccident]
-(
+IF NOT EXISTS (SELECT 1 FROM sys.objects
+		       WHERE object_id = OBJECT_ID(N'[dbo].[FactAccident]')
+		       AND type in (N'U'))
+BEGIN
+	PRINT 'Creating the table FactAccident ...';
+	CREATE TABLE [dbo].[FactAccident]
+	(
 	employee_id			INT NOT NULL
 	,project_id			INT	NOT NULL
 	,machinary_id		INT NOT NULL
 	,item_equipment_id	INT NOT NULL
+	,accident_id		INT NOT NULL
 	,cause				VARCHAR(255) NOT NULL
 	,severity			VARCHAR(20) NOT NULL
 	,turn				VARCHAR(15) NOT NULL
+	,day_lost			INT NOT NULL
 	 CONSTRAINT PK_FactAccident PRIMARY KEY CLUSTERED 
 	(
 		employee_id			ASC
@@ -154,7 +181,13 @@ CREATE TABLE [dbo].[FactAccident]
 				ALLOW_ROW_LOCKS = ON, 
 				ALLOW_PAGE_LOCKS = ON
 			  ) ON [PRIMARY]
-) ON [PRIMARY]
+	) ON [PRIMARY]
+		PRINT 'DimProject Table Created!';
+	END
+ELSE
+	BEGIN
+		PRINT 'DimProject table already exists in the Database: ';
+	END
 GO
 
 /*************************************************************************
@@ -167,13 +200,25 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
-CREATE TABLE [ETL].[Machinary]
-(
-	machinary_id	INT NOT NULL
-	,name_mac		VARCHAR(150) NOT NULL
-	,brand_mac		VARCHAR(50) NOT NULL
-	,model_mac		VARCHAR(50) NOT NULL
-) ON [PRIMARY]
+IF NOT EXISTS (SELECT 1 FROM sys.objects 
+		       WHERE object_id = OBJECT_ID(N'[ETL].[Machinary]') 
+		      AND type in (N'U'))
+BEGIN
+	PRINT 'Creating the table [ETL].[Machinary] table....';
+	CREATE TABLE [ETL].[Machinary]
+	(
+		machinary_id	INT NOT NULL
+		,name_mac		VARCHAR(150) NOT NULL
+		,brand_mac		VARCHAR(50) NOT NULL
+		,model_mac		VARCHAR(50) NOT NULL
+	) ON [PRIMARY]
+
+		PRINT '[ETL].[Machinary] Table Created!';
+	END
+ELSE
+	BEGIN
+		PRINT '[ETL].[Machinary] table already exists in the Database: ';
+	END
 GO
 
 /*************************************************************************
@@ -186,14 +231,25 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
+IF NOT EXISTS (SELECT 1 FROM sys.objects 
+		       WHERE object_id = OBJECT_ID(N'[ETL].[Project]') 
+		      AND type in (N'U'))
+BEGIN
+	PRINT 'Creating the table [ETL].[Project] table....';
+	CREATE TABLE [ETL].[Project]
+	(
+		project_id		INT NOT NULL
+		,name_pro		VARCHAR(255) NOT NULL
+		,location_pro	VARCHAR(255) NOT NULL
+		,budget_pro		MONEY NOT NULL
+	) ON [PRIMARY]
 
-CREATE TABLE [ETL].[Project]
-(
-	project_id		INT NOT NULL
-	,name_pro		VARCHAR(255) NOT NULL
-	,location_pro	VARCHAR(255) NOT NULL
-	,budget_pro		MONEY NOT NULL
-) ON [PRIMARY]
+		PRINT '[ETL].[Project] Table Created!';
+	END
+ELSE
+	BEGIN
+		PRINT '[ETL].[Project] table already exists in the Database: ';
+	END
 GO
 
 /*************************************************************************
@@ -246,17 +302,30 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
+IF NOT EXISTS (SELECT 1 FROM sys.objects 
+		       WHERE object_id = OBJECT_ID(N'[ETL].[Accident]') 
+		      AND type in (N'U'))
+BEGIN
+	PRINT 'Creating the table [ETL].[Accident] table....';
+	CREATE TABLE [ETL].[Accident]
+	(
+		employee_id			INT NOT NULL
+		,project_id			INT	NOT NULL
+		,machinary_id		INT NOT NULL
+		,item_equipment_id	INT NOT NULL
+		,accident_id		INT NOT NULL
+		,cause				VARCHAR(255) NOT NULL
+		,severity			VARCHAR(20) NOT NULL
+		,turn				VARCHAR(15) NOT NULL
+		,day_lost			INT NOT NULL
+	) ON [PRIMARY]
 
-CREATE TABLE [ETL].[Accident]
-(
-	employee_id			INT NOT NULL
-	,project_id			INT	NOT NULL
-	,machinary_id		INT NOT NULL
-	,item_equipment_id	INT NOT NULL
-	,cause				VARCHAR(255) NOT NULL
-	,severity			VARCHAR(20) NOT NULL
-	,turn				VARCHAR(15) NOT NULL
-) ON [PRIMARY]
+		PRINT '[ETL].[Accident] Table Created!';
+	END
+ELSE
+	BEGIN
+		PRINT '[ETL].[Accident] table already exists in the Database: ';
+	END
 GO
 
 /*************************************************************************
@@ -305,6 +374,12 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
+PRINT 'Creando PROCEDURE llamado  -> [ETL].[DW_MergeMachinary]...';
+IF OBJECT_ID (N'[ETL].[DW_MergeMachinary]') IS NOT NULL
+BEGIN
+    DROP PROCEDURE [ETL].[DW_MergeMachinary];
+END
+GO
 
 CREATE PROCEDURE [ETL].[DW_MergeMachinary]
 AS
@@ -355,6 +430,12 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
+PRINT 'Creando PROCEDURE llamado  -> [ETL].[DW_MergeProject]...';
+IF OBJECT_ID (N'[ETL].[DW_MergeProject]') IS NOT NULL
+BEGIN
+    DROP PROCEDURE [ETL].[DW_MergeProject];
+END
+GO
 
 CREATE PROCEDURE [ETL].[DW_MergeProject]
 AS
@@ -500,7 +581,12 @@ GO
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
 **************************************************************************/
-
+PRINT 'Creando PROCEDURE llamado  -> [ETL].[DW_MergeAccident]...';
+IF OBJECT_ID (N'[ETL].[DW_MergeAccident]') IS NOT NULL
+BEGIN
+    DROP PROCEDURE [ETL].[DW_MergeAccident];
+END
+GO
 CREATE PROCEDURE [ETL].[DW_MergeAccident]
 AS
 SET NOCOUNT ON;
@@ -510,10 +596,12 @@ BEGIN
 	USING [ETL].[Accident] AS source
 	ON
 	(
-		target.[employee_id]			= source.[employee_id]
+		
+		 target.[employee_id]			= source.[employee_id]
 		AND target.[project_id]			= source.[project_id]	
 		AND target.[machinary_id]		= source.[machinary_id]	
 		AND target.[item_equipment_id]	= source.[item_equipment_id]
+		AND target.[accident_id]		= source.[accident_id]
 	)
 	WHEN MATCHED
 	THEN UPDATE 
@@ -528,19 +616,23 @@ BEGIN
 		,[project_id]
 		,[machinary_id]
 		,[item_equipment_id]
+		,[accident_id]
 		,[cause]
 		,[severity]
 		,[turn]
+		,[day_lost]
 	  )
 	  VALUES
 	  (
-		[employee_id]
+		source.[employee_id]
 		,source.[project_id]
 		,source.[machinary_id]
 		,source.[item_equipment_id]
+		,source.[accident_id]
 		,source.[cause]
 		,source.[severity]
 		,source.[turn]
+		,source.[day_lost]
 	  );
 END
 GO
