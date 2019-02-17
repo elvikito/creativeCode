@@ -771,3 +771,232 @@ GO
 
 PRINT 'Procedure [dbo].[DeleteDepartment] created';
 GO
+
+----------------
+-- POST 
+-- ----------------------------
+-- Author: Elvis R. Ramirez Iriarte 
+-- PROCEDURE InsertArea
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[InsertArea]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[InsertArea];
+END
+GO
+
+CREATE PROCEDURE [dbo].[InsertArea] (
+        @department_id  INT
+        ,@name           VARCHAR(255)
+        ,@description   VARCHAR(255)
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+    INSERT INTO [dbo].[Area] (
+        [department_id]
+        ,[name]
+        ,[description]
+	)
+	VALUES (
+         @department_id
+		 ,@name
+         ,@description
+	);
+END
+GO
+GRANT EXECUTE ON OBJECT::[dbo].[InsertArea] TO [RoleService] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[InsertArea] created';
+GO
+
+----------------
+-- Update 
+-- ----------------------------
+-- Author: Elvis R. Ramirez Iriarte 
+-- PROCEDURE UpdateArea
+-- ----------------------------
+
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[UpdateArea]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[UpdateArea];
+END
+GO
+
+CREATE PROCEDURE [dbo].[UpdateArea] (
+        @area_id         INT
+	    ,@department_id  INT
+        ,@name           VARCHAR(255)
+        ,@description    VARCHAR(255)
+        ,@created_at     DATETIME
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+    UPDATE [dbo].[Area]
+    SET   [department_id]    = @department_id
+         ,[name]             = @name
+         ,[description]  = @description
+         ,[created_at]   = @created_at
+         ,[updated_at]   = GETDATE()
+	WHERE area_id   = @area_id
+END
+GO
+
+GRANT EXECUTE ON OBJECT::[dbo].[UpdateArea] TO [RoleService] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[UpdateArea] created';
+GO
+
+
+----------------
+-- Update 
+-- ----------------------------
+-- Author: Elvis R. Ramirez Iriarte 
+-- PROCEDURE DeleteArea
+-- ----------------------------
+
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[DeleteArea]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[DeleteArea];
+END
+GO
+CREATE PROCEDURE [dbo].[DeleteArea]
+(
+	@area_id INT
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+	DELETE FROM Area 
+	WHERE area_id = @area_id
+END
+GO
+
+GRANT EXECUTE ON OBJECT::[dbo].[DeleteArea] TO [RoleService] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[DeleteArea] created';
+GO
+
+
+----------------
+-- POST 
+-- ----------------------------
+-- Author: Elvis R. Ramirez Iriarte 
+-- PROCEDURE InsertPosition
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[InsertPosition]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[InsertPosition];
+END
+GO
+
+CREATE PROCEDURE [dbo].[InsertPosition] (
+        @name           VARCHAR(255)
+        ,@description   VARCHAR(255)
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+    INSERT INTO [dbo].[Position] (
+        [name]
+        ,[description]
+	)
+	VALUES (
+		 @name
+         ,@description
+	);
+END
+GO
+GRANT EXECUTE ON OBJECT::[dbo].[InsertPosition] TO [RoleService] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[InsertPosition] created';
+GO
+
+----------------
+-- Update 
+-- ----------------------------
+-- Author: Elvis R. Ramirez Iriarte 
+-- PROCEDURE UpdatePosition
+-- ----------------------------
+
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[UpdatePosition]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[UpdatePosition];
+END
+GO
+
+CREATE PROCEDURE [dbo].[UpdatePosition] (
+        @position_id     INT
+        ,@name           VARCHAR(255)
+        ,@description    VARCHAR(255)
+        ,@created_at     DATETIME
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+    UPDATE [dbo].[Position]
+    SET  [name]         = @name
+         ,[description]  = @description
+         ,[created_at]   = @created_at
+         ,[updated_at]   = GETDATE()
+	WHERE position_id    = @position_id
+END
+GO
+
+GRANT EXECUTE ON OBJECT::[dbo].[UpdatePosition] TO [RoleService] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[UpdatePosition] created';
+GO
+
+----------------
+-- Update 
+-- ----------------------------
+-- Author: Elvis R. Ramirez Iriarte 
+-- PROCEDURE DeletePosition
+-- ----------------------------
+
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[DeletePosition]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[DeletePosition];
+END
+GO
+CREATE PROCEDURE [dbo].[DeletePosition]
+(
+	@position_id INT
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+	DELETE FROM Position 
+	WHERE position_id = @position_id
+END
+GO
+
+GRANT EXECUTE ON OBJECT::[dbo].[DeletePosition] TO [RoleService] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[DeletePosition] created';
+GO
