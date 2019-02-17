@@ -3,7 +3,7 @@
 -- Author: Elvis R. Ramirez Iriarte 
 -- PROCEDURE GetEmployee
 -- ----------------------------
-select * from [dbo].[Employee];
+
 IF EXISTS (SELECT * FROM sys.objects 
            WHERE object_id = OBJECT_ID(N'[dbo].[GetEmployee]') 
            AND type in (N'P', N'PC'))
@@ -646,7 +646,6 @@ SET NOCOUNT ON;
 BEGIN
     UPDATE [dbo].[Role]
     SET   [role_name]    = @role_name
-         ,[role_id]      = @role_id
          ,[description]  = @description
          ,[created_at]   = @created_at
          ,[updated_at]   = GETDATE()
