@@ -291,7 +291,7 @@ BEGIN
 END
 GO
 
-GRANT EXECUTE ON OBJECT::[dbo].[InsertEmployee] TO [RoleReporting] AS [dbo];
+GRANT EXECUTE ON OBJECT::[dbo].[InsertEmployee] TO [RoleService] AS [dbo];
 GO
 
 PRINT 'Procedure [dbo].[InsertEmployee] created';
@@ -320,7 +320,8 @@ SET XACT_ABORT ON;
 SET NOCOUNT ON;
 BEGIN
     UPDATE [dbo].[Employee]
-	SET   [ci]       = @ci
+	SET  [person_id]     = @person_id
+         ,[ci]           = @ci
 	     ,[address]      = @address
 	     ,[birth_date]   = @birth_date
 	     ,[gender]       = @gender
@@ -332,7 +333,7 @@ BEGIN
 END
 GO
 
-GRANT EXECUTE ON OBJECT::[dbo].[UpdateEmployee] TO [RoleReporting] AS [dbo];
+GRANT EXECUTE ON OBJECT::[dbo].[UpdateEmployee] TO [RoleService] AS [dbo];
 GO
 
 PRINT 'Procedure [dbo].[UpdateEmployee] created';
@@ -374,7 +375,7 @@ BEGIN
 END
 GO
 
-GRANT EXECUTE ON OBJECT::[dbo].[InsertPerson] TO [RoleReporting] AS [dbo];
+GRANT EXECUTE ON OBJECT::[dbo].[InsertPerson] TO [RoleService] AS [dbo];
 GO
 
 PRINT 'Procedure [dbo].[InsertPerson] created';
@@ -400,7 +401,8 @@ SET XACT_ABORT ON;
 SET NOCOUNT ON;
 BEGIN
     UPDATE [dbo].[Person]
-    SET   [first_name]   = @first_name
+    SET   [person_id]    = @person_id
+         ,[first_name]   = @first_name
          ,[last_name]    = @last_name
          ,[email]        = @email
          ,[created_at]   = @created_at
@@ -409,7 +411,7 @@ BEGIN
 END
 GO
 
-GRANT EXECUTE ON OBJECT::[dbo].[UpdatePerson] TO [RoleReporting] AS [dbo];
+GRANT EXECUTE ON OBJECT::[dbo].[UpdatePerson] TO [RoleService] AS [dbo];
 GO
 
 PRINT 'Procedure [dbo].[UpdatePerson] created';
@@ -448,7 +450,7 @@ BEGIN
 END
 GO
 
-GRANT EXECUTE ON OBJECT::[dbo].[InsertRolePerson] TO [RoleReporting] AS [dbo];
+GRANT EXECUTE ON OBJECT::[dbo].[InsertRolePerson] TO [RoleService] AS [dbo];
 GO
 
 PRINT 'Procedure [dbo].[InsertRolePerson] created';
@@ -481,8 +483,181 @@ BEGIN
 END
 GO
 
-GRANT EXECUTE ON OBJECT::[dbo].[UpdateRolePerson] TO [RoleReporting] AS [dbo];
+GRANT EXECUTE ON OBJECT::[dbo].[UpdateRolePerson] TO [RoleService] AS [dbo];
 GO
 
 PRINT 'Procedure [dbo].[UpdateRolePerson] created';
+GO
+
+
+-- POST 
+-- ----------------------------
+-- Author: Elvis R. Ramirez Iriarte 
+-- PROCEDURE InsertProject
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[InsertProject]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[InsertProject];
+END
+GO
+
+CREATE PROCEDURE [dbo].[InsertProject] (
+      @name_project         VARCHAR(255)
+     ,@design_project       VARCHAR(255)
+     ,@location_project     VARCHAR(255)
+     ,@budget_project       MONEY
+     ,@start_date_project   DATETIME
+     ,@ending_date_project  DATETIME
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+    INSERT INTO [dbo].[Project] (
+         [name_project]
+        ,[design_project]
+        ,[location_project]
+        ,[budget_project]
+        ,[start_date_project]
+        ,[ending_date_project]
+	)
+	VALUES (
+		 @name_project
+        ,@design_project
+        ,@location_project
+        ,@budget_project
+        ,@start_date_project
+        ,@ending_date_project
+	);
+END
+GO
+
+GRANT EXECUTE ON OBJECT::[dbo].[InsertProject] TO [RoleService] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[InsertProject] created';
+GO
+
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[UpdateProject]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[UpdateProject];
+END
+GO
+
+CREATE PROCEDURE [dbo].[UpdateProject] (
+	 @project_id            INT
+	 ,@name_project         VARCHAR(255)
+     ,@design_project       VARCHAR(255)
+     ,@location_project     VARCHAR(255)
+     ,@budget_project       MONEY
+     ,@start_date_project   DATETIME
+     ,@ending_date_project  DATETIME
+     ,@created_at           DATETIME
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+    UPDATE [dbo].[Project]
+    SET  [project_id]           = @project_id
+         ,[name_project]        = @name_project
+         ,[design_project]      = @design_project
+         ,[location_project]    = @location_project
+         ,[budget_project]      = @budget_project
+         ,[start_date_project]  = @start_date_project
+         ,[ending_date_project] = @ending_date_project
+         ,[created_at]          = @created_at
+         ,[updated_at]          = GETDATE()
+	WHERE project_id = @project_id
+END
+GO
+
+GRANT EXECUTE ON OBJECT::[dbo].[UpdateProject] TO [RoleService] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[UpdateProject] created';
+GO
+
+----------------
+
+-- POST 
+-- ----------------------------
+-- Author: Elvis R. Ramirez Iriarte 
+-- PROCEDURE InsertRole
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[InsertRole]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[InsertRole];
+END
+GO
+
+CREATE PROCEDURE [dbo].[InsertRole] (
+        @role_name      VARCHAR(50)
+        ,@description   VARCHAR(200)
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+    INSERT INTO [dbo].[Role] (
+         [role_name]
+        ,[description]
+	)
+	VALUES (
+		 @role_name
+        ,@description
+	);
+END
+GO
+GRANT EXECUTE ON OBJECT::[dbo].[InsertRole] TO [RoleService] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[InsertRole] created';
+GO
+
+----------------
+-- Update 
+-- ----------------------------
+-- Author: Elvis R. Ramirez Iriarte 
+-- PROCEDURE UpdateRole
+-- ----------------------------
+
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[UpdateRole]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[UpdateRole];
+END
+GO
+
+CREATE PROCEDURE [dbo].[UpdateRole] (
+	 @role_id           INT
+	,@role_name         VARCHAR(50)
+    ,@description       VARCHAR(200)
+    ,@created_at        DATETIME
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+    UPDATE [dbo].[Role]
+    SET   [role_name]    = @role_name
+         ,[role_id]      = @role_id
+         ,[description]  = @description
+         ,[created_at]   = @created_at
+         ,[updated_at]   = GETDATE()
+	WHERE role_id   = @role_id
+END
+GO
+
+GRANT EXECUTE ON OBJECT::[dbo].[UpdateRole] TO [RoleService] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[UpdateRole] created';
 GO
