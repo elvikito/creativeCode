@@ -249,24 +249,48 @@ GO
 -- PROCEDURE PostEmployee
 -- ----------------------------
 
-CREATE PROCEDURE [dbo].[InsertEmployee]
-(
-    @person_id INT,
-    @ci INT,
-    @address VARCHAR(255),
-    @birth_date DATETIME,
-    @gender VARCHAR(8),
-    @phone_number INT,
-    @picture VARBINARY(max),
-    @created_at DATETIME,
-    @updated_at DATETIME
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[InsertEmployee]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[InsertEmployee];
+END
+GO
+
+CREATE PROCEDURE [dbo].[InsertEmployee] (
+	 @first_name   VARCHAR(50)
+	,@last_name    VARCHAR(50)
+	,@email        VARCHAR(40)
+	,@ci           INT
+	,@address      VARCHAR(255)
+	,@birth_date   DATETIME
+	,@gender       VARCHAR(8)
+	,@phone_number INT
+	,@picture      VARBINARY(MAX)
 )
 AS
 SET XACT_ABORT ON;
 SET NOCOUNT ON;
 BEGIN
-    INSERT INTO [dbo].[Employee]([person_id],[ci],[address],[birth_date],[gender],[phone_number],[picture],[created_at],[updated_at])
-	VALUES(@person_id, @ci, @address, @birth_date,@gender, @phone_number, @picture, @created_at, @updated_at);
+    INSERT INTO [dbo].[Employee] (
+		 [person_id]
+		,[ci]
+		,[address]
+		,[birth_date]
+		,[gender]
+		,[phone_number]
+		,[picture]
+	)
+	VALUES (
+		 @person_id
+		,@ci
+		,@address
+		,@birth_date
+		,@gender
+		,@phone_number
+		,@picture
+	);
+	
 	IF @@ROWCOUNT > 0
 	BEGIN
 		SELECT [updated_at] 
@@ -280,4 +304,48 @@ GRANT EXECUTE ON OBJECT::[dbo].[InsertEmployee] TO [RoleReporting] AS [dbo];
 GO
 
 PRINT 'Procedure [dbo].[InsertEmployee] created';
+GO
+
+IF EXISTS (SELECT * FROM sys.objects 
+           WHERE object_id = OBJECT_ID(N'[dbo].[UpdateEmployee]') 
+           AND type in (N'P', N'PC'))
+BEGIN
+	DROP PROCEDURE [dbo].[UpdateEmployee];
+END
+GO
+
+CREATE PROCEDURE [dbo].[UpdateEmployee] (
+	 @employee_id  INT
+	,@first_name   VARCHAR(50)
+	,@last_name    VARCHAR(50)
+	,@email        VARCHAR(40)
+	,@ci           INT
+	,@address      VARCHAR(255)
+	,@birth_date   DATETIME
+	,@gender       VARCHAR(8)
+	,@phone_number INT
+	,@picture      VARBINARY(MAX)
+)
+AS
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+BEGIN
+	UPDATE OfficeAssignment 
+	SET Location = @Location 
+	WHERE InstructorID = @InstructorID 
+	AND [Timestamp] = @OrigTimestamp;
+
+	IF @@ROWCOUNT > 0
+	 BEGIN
+		SELECT [Timestamp] 
+		FROM OfficeAssignment 
+		WHERE InstructorID = @InstructorID;
+	 END
+END
+GO
+
+GRANT EXECUTE ON OBJECT::[dbo].[UpdateEmployee] TO [MyService] AS [dbo];
+GO
+
+PRINT 'Procedure [dbo].[UpdateEmployee] created';
 GO
