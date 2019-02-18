@@ -9,7 +9,8 @@ GO
 **************************************************************************
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
-** 10/02/2019		Elvis L. Arispe			Version Initial				**
+** 10/02/2019		Elvis L. Arispe			Version Initial             **
+**				    Pamela Cardozo          Version Initial             **
 **************************************************************************/
 
 ALTER TABLE [dbo].[Accident] ADD [Rowversion] [timestamp] NOT NULL;
@@ -43,6 +44,7 @@ GO
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
+**                  Pamela Cardozo          Initial Version             **
 **************************************************************************/
 
 CREATE SCHEMA [ETL];
@@ -59,6 +61,7 @@ GO
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
+**                  Pamela Cardozo          Initial Version              **
 **************************************************************************/
 
 CREATE TABLE [ETL].[TableMigration](
@@ -84,13 +87,14 @@ GO
 **	Called by: SQL Job													**
 **	Author: Marcelo Claure												**
 **	Reused: Elvis Leonel Arispe	Cabrera									**
-**																		**
+**			Pamela Cardozo Peralta															**
 **************************************************************************
 **                            CHANGE HISTORY							**
 **************************************************************************
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
+**                  Pamela Cardozo          Initial Version              **
 **************************************************************************/
 
 CREATE FUNCTION [ETL].[GetDatabaseRowVersion] ()
@@ -109,13 +113,14 @@ GO
 **	Called by: SQL Job													**
 **	Author: Marcelo Claure												**
 **	Reused: Elvis Leonel Arispe	Cabrera									**
-**																		**
+**			Pamela Cardozo Peralta															**
 **************************************************************************
 **                            CHANGE HISTORY							**
 **************************************************************************
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
+**                  Pamela Cardozo          Initial Version              **
 **************************************************************************/
 
 CREATE FUNCTION [ETL].[GetTableMigrationLatestRowVersion] 
@@ -142,13 +147,14 @@ GO
 **	Called by: SQL Job													**
 **	Author: Marcelo Claure												**
 **	Reused: Elvis Leonel Arispe	Cabrera									**
-**																		**
+**			Pamela Cardozo Peralta															**
 **************************************************************************
 **                            CHANGE HISTORY							**
 **************************************************************************
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
+**                  Pamela Cardozo          Initial Version              **
 **************************************************************************/
 
 CREATE PROCEDURE [ETL].[UpdateTableMigration]
@@ -173,13 +179,14 @@ GO
 **	Called by: SQL Job													**
 **	Author: Marcelo Claure												**
 **	Reused: Elvis Leonel Arispe	Cabrera									**
-**																		**
+**			Pamela Cardozo Peralta															**
 **************************************************************************
 **                            CHANGE HISTORY							**
 **************************************************************************
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
+**                  Pamela Cardozo          Initial Version              **
 **************************************************************************/
 
 CREATE PROCEDURE [ETL].[PullDataToDatawarehouse]
@@ -283,7 +290,7 @@ GO
 **************************************************************************
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
-** 10/02/2019		Pamela Cardozo			Version Initial				**
+** 10/02/2019		Pamela Cardozo			Initial Version 				**
 **************************************************************************/
 
 CREATE PROCEDURE [ETL].[GetEmployeeChangesByRowVersion]
@@ -301,6 +308,7 @@ AS
 		  ,emp.[ci]
 		  ,emp.[gender]
 		  ,emp.[phone_number]
+		  ,emp.[address]
 	FROM [dbo].[Employee] emp
 	INNER JOIN [dbo].[Person] per
 	ON (emp.person_id = per.person_id)
@@ -309,7 +317,7 @@ AS
 GO
 
 /*************************************************************************
-**  Procedure Name:	[ETL].[GetEmployeeChangesByRowVersion]				**
+**  Procedure Name:	[ETL].[GetItemChangesByRowVersion]				**
 **																		**
 **	Called by: SQL Job													**
 **																		**
@@ -318,7 +326,7 @@ GO
 **************************************************************************
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
-** 10/02/2019		Pamela Cardozo			Version Initial				**
+** 10/02/2019		Pamela Cardozo			Initial Version 				**
 **************************************************************************/
 
 CREATE PROCEDURE [ETL].[GetItemChangesByRowVersion]
@@ -330,8 +338,8 @@ AS
 	SET NOCOUNT ON;
 	SET XACT_ABORT ON;
 
-	SELECT [item_equipment_id]
-		  ,[name_equipment] 
+	SELECT [item_id]
+		  ,[name_] 
 		  ,[description] 
 	FROM [dbo].[Item] 
 	WHERE [Rowversion] > CONVERT(ROWVERSION, @LastRowVersionID)
@@ -361,7 +369,8 @@ AS
 	SET NOCOUNT ON;
 	SET XACT_ABORT ON;
 
-	SELECT	emp.employee_id				-- id Empleado
+	SELECT	accident_id 
+	        ,emp.employee_id				-- id Empleado
 			,emp_proj.project_id		-- id Proyecto
 			,ass_mac.machinery_id		-- id Maquinaria
 			,ass_item.item_equipment_id	-- id Item
@@ -377,7 +386,7 @@ AS
 	ON (emp_proj.employee_id = emp.employee_id)
 	INNER JOIN [dbo].[Assignment_Machinery] ass_mac
 	ON (ass_mac.emp_proj_id = emp_proj.emp_proj_id)
-	INNER JOIN [dbo].[Assignment_Item_Equipment] ass_item
+	INNER JOIN [dbo].[Assignment_Item] ass_item
 	ON (ass_item.emp_proj_id = emp_proj.emp_proj_id)
 	WHERE acc.[Rowversion] > CONVERT(ROWVERSION, @LastRowVersionID)
 	AND acc.[Rowversion] <= CONVERT(ROWVERSION, @CurrentDBTS);	

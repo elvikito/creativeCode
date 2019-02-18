@@ -76,7 +76,7 @@ GO
 **************************************************************************
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
-** 10/02/2019		Pamela Cardozo			Version Initial				**
+** 10/02/2019		Pamela Cardozo			Initial	Version 			**
 **************************************************************************/
 
 CREATE TABLE [dbo].[DimEmployee](
@@ -86,36 +86,45 @@ CREATE TABLE [dbo].[DimEmployee](
 	[Employeeci] [int] NOT NULL,
 	[Employeegender] [nvarchar](50) NOT NULL,
 	[Employeephone_number] [int] NOT NULL,
+	[Employeeaddress] [nvarchar](50) NOT NULL
  CONSTRAINT [PK_DimEmployee] PRIMARY KEY CLUSTERED 
 (
 	[employee_id] ASC
 	
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, 
+       STATISTICS_NORECOMPUTE = OFF, 
+	   IGNORE_DUP_KEY = OFF, 
+	   ALLOW_ROW_LOCKS = ON, 
+	   ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 
 /*************************************************************************
 **  Table Name: [dbo].[DimItem]											**
 **																		**
-**  Primary Key: [item_equipment_id]									**
+**  Primary Key: [item_id]	            								**
 **	Foreign Keys: --													**
 **************************************************************************
 **                            CHANGE HISTORY							**
 **************************************************************************
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
-** 10/02/2019		Pamela Cardozo			Version Initial				**
+** 10/02/2019		Pamela Cardozo			Initial Version				**
 **************************************************************************/
 
 CREATE TABLE [dbo].[DimItem](
-    [item_equipment_id] [int] NOT NULL,
-	[Itemname_equipment] [nvarchar](100) NOT NULL,
+    [item_id] [int] NOT NULL,
+	[Itemname] [nvarchar](100) NOT NULL,
 	[Itemdescription] [nvarchar](100) NOT NULL,
 	
  CONSTRAINT [PK_DimItem] PRIMARY KEY CLUSTERED 
 (
-	[item_equipment_id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+	[item_id] ASC
+)WITH (PAD_INDEX = OFF, 
+       STATISTICS_NORECOMPUTE = OFF, 
+	   IGNORE_DUP_KEY = OFF, 
+	   ALLOW_ROW_LOCKS = ON, 
+	   ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 
@@ -135,7 +144,8 @@ GO
 
 CREATE TABLE [dbo].[FactAccident]
 (
-	employee_id			INT NOT NULL
+	accident_id         INT NOT NULL
+	,employee_id		INT NOT NULL
 	,project_id			INT	NOT NULL
 	,machinary_id		INT NOT NULL
 	,item_equipment_id	INT NOT NULL
@@ -214,6 +224,7 @@ CREATE TABLE [ETL].[Employee](
 	[ci] [int] NOT NULL,
 	[gender] [nvarchar](50) NOT NULL,
 	[phone_number] [int] NOT NULL,
+	[address] [nvarchar](50) NOT NULL
 ) ON [PRIMARY]
 GO
 
@@ -229,8 +240,8 @@ GO
 **************************************************************************/
 
 CREATE TABLE [ETL].[Item](
-	[item_equipment_id] [int] NOT NULL,
-	[name_equipment] [nvarchar](100) NOT NULL,
+	[item_id] [int] NOT NULL,
+	[name] [nvarchar](100) NOT NULL,
 	[description] [nvarchar](100) NOT NULL,
 	
 ) ON [PRIMARY]
@@ -252,7 +263,7 @@ CREATE TABLE [ETL].[Accident]
 	employee_id			INT NOT NULL
 	,project_id			INT	NOT NULL
 	,machinary_id		INT NOT NULL
-	,item_equipment_id	INT NOT NULL
+	,item_id	INT NOT NULL
 	,cause				VARCHAR(255) NOT NULL
 	,severity			VARCHAR(20) NOT NULL
 	,turn				VARCHAR(15) NOT NULL
@@ -285,8 +296,8 @@ REFERENCES  [dbo].[DimEmployee] ([employee_id])
 GO
 ALTER TABLE [dbo].[FactAccident] CHECK CONSTRAINT [FK_DimEmployee]
 GO
-ALTER TABLE [dbo].[FactAccident]  WITH CHECK ADD  CONSTRAINT [FK_DimItem] FOREIGN KEY([item_equipment_id])
-REFERENCES  [dbo].[DimItem] ([item_equipment_id])
+ALTER TABLE [dbo].[FactAccident]  WITH CHECK ADD  CONSTRAINT [FK_DimItem] FOREIGN KEY([item_id])
+REFERENCES  [dbo].[DimItem] ([item_id])
 GO
 ALTER TABLE [dbo].[FactAccident] CHECK CONSTRAINT [FK_DimItem]
 GO
@@ -399,7 +410,7 @@ GO
 **************************************************************************
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
-** 10/02/2019		Pamela Cardozo			Version Initial				**
+** 10/02/2019		Pamela Cardozo			Initial Version				**
 **************************************************************************/
 
 CREATE PROCEDURE [ETL].[DW_MergeEmployee]
@@ -420,6 +431,7 @@ BEGIN
 			,[Employeeci] = source.[ci]
 			,[Employeegender] = source.[gender]
 			,[Employeephone_number] = source.[phone_number]
+			,[Employeeaddress] = source.[address]
 	WHEN NOT MATCHED
 	THEN 
 	  INSERT
@@ -430,6 +442,7 @@ BEGIN
 		,[Employeeci]
 		,[Employeegender]
 		,[Employeephone_number]
+		,[Employeeaddress]
 	  )
 	  VALUES
 	  (
@@ -439,6 +452,7 @@ BEGIN
 		,source.[ci]
 		,source.[gender]
 		,source.[phone_number]
+		,source.[address]
 	  );
 END
 GO
@@ -465,24 +479,24 @@ BEGIN
 	USING [ETL].[Item] AS source
 	ON
 	(
-	  target.[item_equipment_id] = source.[item_equipment_id]
+	  target.[item_id] = source.[item_id]
 	)
 	WHEN MATCHED
 	THEN UPDATE 
-		 SET [Itemname_equipment] = source.[name_equipment]
+		 SET [Itemname] = source.[name]
 			,[Itemdescription]     = source.[description]
 	WHEN NOT MATCHED
 	THEN 
 	  INSERT
 	  (
-		[item_equipment_id] 
-		,[Itemname_equipment]
+		[item_id] 
+		,[Itemname]
 		,[Itemdescription] 
 	  )
 	  VALUES
 	  (
-		source.[item_equipment_id]
-		,source.[name_equipment]
+		source.[item_id]
+		,source.[name]
 		,source.[description]
 	  );
 END
@@ -513,7 +527,7 @@ BEGIN
 		target.[employee_id]			= source.[employee_id]
 		AND target.[project_id]			= source.[project_id]	
 		AND target.[machinary_id]		= source.[machinary_id]	
-		AND target.[item_equipment_id]	= source.[item_equipment_id]
+		AND target.[item_id]	        = source.[item_id]
 	)
 	WHEN MATCHED
 	THEN UPDATE 
@@ -527,7 +541,7 @@ BEGIN
 		[employee_id]
 		,[project_id]
 		,[machinary_id]
-		,[item_equipment_id]
+		,[item_id]
 		,[cause]
 		,[severity]
 		,[turn]
@@ -537,7 +551,7 @@ BEGIN
 		[employee_id]
 		,source.[project_id]
 		,source.[machinary_id]
-		,source.[item_equipment_id]
+		,source.[item_id]
 		,source.[cause]
 		,source.[severity]
 		,source.[turn]
