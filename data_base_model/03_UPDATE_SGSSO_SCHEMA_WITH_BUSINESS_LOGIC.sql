@@ -3,6 +3,7 @@ USE [SGSSO]
 PRINT 'Start of Script Execution....';
 GO
 
+
 /*************************************************************************
 **  Name: InsertUser            										**
 **  Desc: Insert a new user of the system  								**
@@ -682,6 +683,170 @@ GO
 
 PRINT 'Procedure [dbo].[UpdateProject] created';
 GO
+
+/*************************************************************************
+**  Name: InsertMachinery        		    								**
+**  Desc: Insert a new machinery        								**
+**																		**
+**  Called by: Portal        											**
+**************************************************************************
+**                            CHANGE HISTORY							**
+**************************************************************************
+** Date:			Author:					Description:				**
+** -----------		----------------		----------------			**
+** 17/02/2019		Antonio Vargas			Initial version				**
+**************************************************************************/
+
+IF EXISTS (SELECT * FROM sys.objects 
+		   WHERE object_id = OBJECT_ID(N'[dbo].[InsertMachinery]') 
+		         AND type in (N'P', N'PC'))
+	BEGIN
+		DROP PROCEDURE [dbo].[InsertMachinery]
+	END
+GO
+
+CREATE PROCEDURE [dbo].[InsertMachinery] (
+	 @name_machinery  VARCHAR(150)
+	,@brand_machinery VARCHAR(50)
+	,@model_machinery VARCHAR(50)
+	,@state_machinery VARCHAR(50)
+)
+AS
+
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+
+BEGIN
+
+	INSERT INTO [dbo].[Machinery] (
+		 [name_machinery]
+		,[brand_machinery]
+		,[model_machinery]
+		,[state_machinery]
+	)
+	VALUES (
+		 @name_machinery
+		,@brand_machinery
+		,@model_machinery
+		,@state_machinery
+	);
+
+END
+GO
+
+PRINT 'Procedure [dbo].[InsertMachinery] created';
+GO
+
+/*************************************************************************
+**  Name: UpdateMachinery        										**
+**  Desc: Updates Machinery's information 								**
+**																		**
+**  Called by: Portal        											**
+**************************************************************************
+**                            CHANGE HISTORY							**
+**************************************************************************
+** Date:			Author:					Description:				**
+** -----------		----------------		----------------			**
+** 17/02/2019		Antonio Vargas			Initial version				**
+**************************************************************************/
+
+IF EXISTS (SELECT * FROM sys.objects 
+		   WHERE object_id = OBJECT_ID(N'[dbo].[UpdateMachinery]') 
+		         AND type in (N'P', N'PC'))
+	BEGIN
+		DROP PROCEDURE [dbo].[UpdateMachinery]
+	END
+GO
+
+CREATE PROCEDURE [dbo].[UpdateMachinery] (
+	 @machinery_id    INT
+	,@name_machinery  VARCHAR(150)
+	,@brand_machinery VARCHAR(50)
+	,@model_machinery VARCHAR(50)
+	,@state_machinery VARCHAR(50)
+)
+AS
+
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+
+BEGIN
+
+	IF EXISTS (SELECT 1
+	           FROM [dbo].[Machinery]
+		       WHERE machinery_id = @machinery_id)
+		BEGIN
+
+			UPDATE [dbo].[Machinery]
+			SET  [name_machinery]  = @name_machinery
+				,[brand_machinery] = @brand_machinery
+				,[model_machinery] = @model_machinery
+ 				,[state_machinery] = @state_machinery
+			WHERE machinery_id = @machinery_id;
+
+		END
+	
+	ELSE
+		BEGIN
+			PRINT 'Error: the id of the machinery does not exist.';
+		END
+
+END
+GO
+
+PRINT 'Procedure [dbo].[UpdateMachinery] created';
+GO
+
+/*************************************************************************
+**  Name: DeleteMachinery        										**
+**  Desc: Deletes machinery              								**
+**																		**
+**  Called by: Portal        											**
+**************************************************************************
+**                            CHANGE HISTORY							**
+**************************************************************************
+** Date:			Author:					Description:				**
+** -----------		----------------		----------------			**
+** 17/02/2019		Antonio Vargas			Initial version				**
+**************************************************************************/
+
+IF EXISTS (SELECT * FROM sys.objects 
+		   WHERE object_id = OBJECT_ID(N'[dbo].[DeleteMachinery]') 
+		         AND type in (N'P', N'PC'))
+	BEGIN
+		DROP PROCEDURE [dbo].[DeleteMachinery]
+	END
+GO
+
+CREATE PROCEDURE [dbo].[DeleteMachinery] (
+	 @machinery_id  INT
+)
+AS
+
+SET XACT_ABORT ON;
+SET NOCOUNT ON;
+
+BEGIN
+
+	IF EXISTS (SELECT 1
+	           FROM [dbo].[Machinery]
+		       WHERE machinery_id = @machinery_id)
+		BEGIN
+			DELETE FROM [dbo].[Machinery]
+      		WHERE machinery_id = @machinery_id;
+		END
+	
+	ELSE
+		BEGIN
+			PRINT 'Error: the id of the machinery does not exist.';
+		END
+
+END
+GO
+
+PRINT 'Procedure [dbo].[DeleteMachinery] created';
+GO
+
 
 PRINT 'End of Script Execution....';
 GO
