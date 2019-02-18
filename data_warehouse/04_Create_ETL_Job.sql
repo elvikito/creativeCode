@@ -33,7 +33,7 @@ DECLARE @jobId BINARY(16)
 		@delete_level=0, 
 		@description=N'No description available.', 
 		@category_name=N'[Uncategorized (Local)]', 
-		@owner_login_name=N'sa', @job_id = @jobId OUTPUT
+		@owner_login_name=N'LEO-DELL\LEO', @job_id = @jobId OUTPUT
 
 IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 

@@ -16,6 +16,7 @@ PRINT 'Initialize Table Migration...';
 ** Date:			Author:					Description:				**
 ** -----------		----------------		----------------			**
 ** 10/02/2019		Elvis L. Arispe			Version Initial				**
+** 10/02/2019		Pamela Cardozo			Version Initial				**
 **************************************************************************/
 
 INSERT INTO [ETL].[TableMigration]([TableName],[LatestChange])
